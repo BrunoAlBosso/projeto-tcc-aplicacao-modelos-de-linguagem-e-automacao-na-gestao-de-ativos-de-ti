@@ -1,0 +1,3665 @@
+{
+  "name": "[NEXUS] workflows de automacao",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        176
+      ],
+      "id": "b28334fd-3474-4f7c-b048-859ca54a0296",
+      "name": "Schedule Trigger",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "command": "systemctl status"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        288,
+        176
+      ],
+      "id": "6576b1e1-ba98-40a3-bf47-3f43506e4af1",
+      "name": "Execute a command",
+      "alwaysOutputData": true,
+      "credentials": {
+        "sshPassword": {
+          "id": "x3N1ua0BnyNkfuK3",
+          "name": "SSH Password account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fbc7ba08-ec06-4ce9-a783-73b101993907",
+              "leftValue": "={{ $json.isEmpty() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        176
+      ],
+      "id": "050ff919-414f-411b-ba98-4f2cbf703e63",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.stdout }}",
+        "options": {
+          "systemMessage": "=Analise o input fornecido e faça um resumo breve sobre o status de um servidor.\n\n- input: {{ $json.stdout }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        736,
+        336
+      ],
+      "id": "4303af35-70e1-450c-b6bd-4036c749d123",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        816,
+        560
+      ],
+      "id": "3576ca84-bbf5-4c78-ab00-422e6638c3a1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "configuration_items",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "item_type",
+              "condition": "eq",
+              "keyValue": "Desktop"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        176
+      ],
+      "id": "ed70ffb8-7174-4e8d-87de-2d3dc301d704",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e22fe34d-22cf-4cad-9224-7b4870cd71e9",
+              "name": "data_expiracao",
+              "value": "={{ $json.data_expiracao }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1760,
+        112
+      ],
+      "id": "431f1a97-c202-4986-9f9e-5c003dc06f36",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b013361d-0e57-4df2-a31a-118acb4528fd",
+              "leftValue": "={{ $json.data_expiracao }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1984,
+        112
+      ],
+      "id": "17274293-7974-4517-87e0-7a4ec5ec41b4",
+      "name": "If1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2208,
+        112
+      ],
+      "id": "70e626e3-6bd3-44a3-b9d6-fa6fcf1661be",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1536,
+        176
+      ],
+      "id": "58ff5cc5-4719-439a-8d24-4ffafdbeec35",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- Início do Código para o Nó 'Code' do n8n ---\n\n// Pega o primeiro item que chega no nó (o $input.first())\nconst item = items[0];\n\n// Pega a data de expiração do JSON\n// Ex: \"2025-12-25T00:00:00\" ou \"2025-11-30\"\nconst dataExpiracaoString = item.json.data_expiracao;\n\n// 1. VERIFICAÇÃO DE DADO DE ENTRADA\n// Se o campo data_expiracao não existir ou estiver vazio,\n// retorna um status de erro e para a execução.\nif (!dataExpiracaoString) {\n  item.json.statusVencimento = \"Data Inválida\";\n  item.json.diasParaVencer = null;\n  return items;\n}\n\n// 2. CÁLCULO DAS DATAS\n// Cria um objeto Date com a data de expiração\nconst dataExpiracao = new Date(dataExpiracaoString);\n// Cria um objeto Date com a data de HOJE (no momento da execução)\nconst hoje = new Date();\n\n// Zera as horas, minutos e segundos de ambas as datas.\n// Isso é MUITO IMPORTANTE para comparar \"dias inteiros\",\n// sem se preocupar com a hora da execução.\ndataExpiracao.setHours(0, 0, 0, 0);\nhoje.setHours(0, 0, 0, 0);\n\n// Calcula a diferença em milissegundos\nconst diffTime = dataExpiracao.getTime() - hoje.getTime();\n\n// Converte a diferença de milissegundos para dias\n// Usamos Math.ceil para arredondar para CIMA.\n// Ex: 1.1 dias restantes = 2 dias no calendário.\n// Ex: 0.1 dias restantes (vence hoje) = 1 dia.\n// ---\n// Retificando: a melhor forma é Math.ceil para \"dias de calendário\"\nconst diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));\n\n\n// 3. APLICAÇÃO DA LÓGICA\n// A lógica é: se a diferença de dias for 7 ou menos, \"Vai Vencer\".\n// Isso inclui dias no futuro próximo, hoje, ou no passado (vencido).\n\nif (diffDays <= 7) {\n  // 7 dias = vence na próxima semana\n  // 1 dia = vence amanhã\n  // 0 dias = vence HOJE\n  // -1 dia = VENCEU ontem\n  item.json.statusVencimento = \"Vai Vencer\";\n} else {\n  // 8 dias ou mais\n  item.json.statusVencimento = \"Não Vai Vencer\";\n}\n\n// 4. RETORNO DOS DADOS\n// Adiciona um campo extra para facilitar a visualização\nitem.json.diasParaVencer = diffDays;\n\n// --- INÍCIO DA ATUALIZAÇÃO ---\n// Adiciona a data de expiração formatada no padrão PT-BR (DD/MM/YYYY)\n// Usamos o objeto 'dataExpiracao' que já foi processado e normalizado.\nconst dia = String(dataExpiracao.getDate()).padStart(2, '0');\nconst mes = String(dataExpiracao.getMonth() + 1).padStart(2, '0'); // getMonth() é 0-indexado (Janeiro=0)\nconst ano = dataExpiracao.getFullYear();\n\nitem.json.dataExpiracaoFormatada = `${dia}/${mes}/${ano}`;\n// --- FIM DA ATUALIZAÇÃO ---\n\n// Retorna o item modificado para o próximo nó\nreturn items;\n\n// --- Fim do Código ---"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2208,
+        304
+      ],
+      "id": "24c80f3d-2f77-49a2-8051-f7f0d559363b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Code in JavaScript').item }}",
+        "options": {
+          "systemMessage": "=Analise o input fornecido e faça um resumo breve sobre a data de vencimento de uma licença do windows, crie uma mensagem de notificação para ser enviada para o usuário.\n\n- data de expiração: {{ $json.dataExpiracaoFormatada }}\n- status: {{ $json.statusVencimento }}\n- dias para vencer: {{ $json.diasParaVencer }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2432,
+        304
+      ],
+      "id": "555e8260-6242-4034-af53-546ce5301c97",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2512,
+        528
+      ],
+      "id": "1af2e702-2cd9-4138-8ae4-c23c9ef130b0",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "39ba2da5-cf8b-4eac-aa9c-98488f1ac47d",
+              "leftValue": "={{ $('Code in JavaScript').item.json.statusVencimento }}",
+              "rightValue": "Vai Vencer",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2784,
+        304
+      ],
+      "id": "1d0b5f1a-01e7-4552-8017-dc681ea9d09e",
+      "name": "If2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3008,
+        464
+      ],
+      "id": "65c529dc-46f1-4096-bac7-e15855f3e80e",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e22fe34d-22cf-4cad-9224-7b4870cd71e9",
+              "name": "send_message",
+              "value": "ALERTA: O servidor [192.168.64.128] parou de responder. Verificação imediata necessária.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1088,
+        80
+      ],
+      "id": "a2c7ba41-e2a6-4b24-8047-86157679afe9",
+      "name": "send_message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e22fe34d-22cf-4cad-9224-7b4870cd71e9",
+              "name": "send_message",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1088,
+        336
+      ],
+      "id": "046286d7-ca46-4e50-8b58-9d99c2de2bd5",
+      "name": "send_message1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e22fe34d-22cf-4cad-9224-7b4870cd71e9",
+              "name": "send_message",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3008,
+        272
+      ],
+      "id": "564c840a-9224-49f0-89b6-8283b225ba69",
+      "name": "send_message2"
+    },
+    {
+      "parameters": {
+        "content": "## Verifica status servidor (VM)",
+        "height": 336,
+        "width": 704,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        16
+      ],
+      "id": "fe9769bc-0109-496a-921f-8bec7694db9c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Analisa se servidor está ativo ou não para enviar notificação a equipe.",
+        "height": 688,
+        "width": 784
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        16
+      ],
+      "id": "e0c5e204-726d-4460-96a3-737d917d9b52",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Analisa licenças windows que foi registrada na base para enviar notificação relacionado a datas próxima ao vencimento.",
+        "height": 688,
+        "width": 1664,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        16
+      ],
+      "id": "2469d858-50a9-4cc5-8055-a4bf8d2f719c",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -16,
+        1856
+      ],
+      "id": "d1ca5fa0-0e58-4ee3-9b48-576f5342c8b7",
+      "name": "Webhook",
+      "webhookId": "d990a308-1161-4dc9-a63e-77cc791ff771",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "configuration_items",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        1168
+      ],
+      "id": "94b020c5-b3df-47cd-b86a-ab3866251c86",
+      "name": "Pegar IC",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// A variável 'items' contém o array completo de todos os \n// itens de entrada, graças ao \"Execute Once\".\nconst totalItens = items.length;\n\n// 1. Vamos criar objetos para armazenar as contagens agrupadas\nconst contagemPorResponsavel = {};\nconst contagemPorData = {};\n\n// 2. Vamos iterar (fazer um loop) por cada item que entrou\nfor (const item of items) {\n  // Pega o dado de CADA item individual\n  const dados = item.json;\n\n  // --- Contagem por Responsável ---\n  const responsavel = dados.item_owner;\n  \n  // Se o responsável (ex: \"Bruno\") já existe no nosso objeto, soma 1.\n  // Se não existe, cria ele com o valor 1.\n  contagemPorResponsavel[responsavel] = (contagemPorResponsavel[responsavel] || 0) + 1;\n\n  // --- Contagem por Data ---\n  // A data é um timestamp completo (ex: \"2025-10-25T12:24:42...\")\n  // Vamos pegar apenas a parte da data (ex: \"2025-10-25\")\n  const dataCompleta = dados.created_at;\n  const dataCurta = dataCompleta.split('T')[0]; // Pega só o \"2025-10-25\"\n  \n  // Faz a mesma lógica de contagem para a data\n  contagemPorData[dataCurta] = (contagemPorData[dataCurta] || 0) + 1;\n}\n\n// 3. Retorna um único objeto com todos os nossos cálculos\nreturn {\n  total_itens_contados: totalItens,\n  contagem_por_responsavel: contagemPorResponsavel,\n  contagem_por_data: contagemPorData\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        1168
+      ],
+      "id": "d6747ab4-9134-4f50-85c0-9c94eccea00e",
+      "name": "Quantidade de IC"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "incidents",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        1568
+      ],
+      "id": "c5526b25-5b3f-4a85-9860-29401b453d5d",
+      "name": "Pegar Incidentes",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "logs",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        1968
+      ],
+      "id": "192f51eb-b124-40b7-9a5d-f7bd16cac801",
+      "name": "Pegar Log",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// A variável 'items' agora contém o array completo de todos os \n// itens de entrada, graças ao \"Execute Once\".\nconst totalIncidentes = items.length;\n\n// Objetos para armazenar as contagens agrupadas\nconst contagemPorStatus = {};\nconst contagemPorUsuario = {};\nconst contagemPorPrioridade = {}; // Adicionado\n\n// Itera (faz um loop) por cada item da lista de entrada\nfor (const item of items) {\n  // Pega o objeto 'json' de dentro de cada item\n  const dados = item.json;\n\n  // --- 1. Contagem por Status ---\n  const status = dados.status;\n  if (status) {\n    contagemPorStatus[status] = (contagemPorStatus[status] || 0) + 1;\n  }\n\n  // --- 2. Contagem por User ID ---\n  const userId = dados.assigned_to_user_id;\n  if (userId) {\n    contagemPorUsuario[userId] = (contagemPorUsuario[userId] || 0) + 1;\n  }\n\n  // --- 3. Contagem por Prioridade --- (Novo bloco)\n  const prioridade = dados.priority;\n  if (prioridade) {\n    contagemPorPrioridade[prioridade] = (contagemPorPrioridade[prioridade] || 0) + 1;\n  }\n}\n\n// Retorna um novo objeto único com todos os cálculos\nreturn {\n  total_incidentes: totalIncidentes,\n  incidentes_por_status: contagemPorStatus,\n  incidentes_por_usuario: contagemPorUsuario,\n  incidentes_por_prioridade: contagemPorPrioridade // Adicionado\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        1568
+      ],
+      "id": "5c9e445c-e9ec-4bbb-b18a-6e40ae766d98",
+      "name": "Quantidade de Incidente"
+    },
+    {
+      "parameters": {
+        "jsCode": "// A variável 'items' agora contém o array completo de todos os \n// itens de entrada, graças ao \"Execute Once\".\nconst totalLogs = items.length;\n\n// Objetos para armazenar as contagens agrupadas\nconst contagemPorData = {};\nconst contagemPorTabela = {};\nconst contagemPorAcao = {};\n\n// Itera (faz um loop) por cada item da lista de entrada\nfor (const item of items) {\n  // Pega o objeto 'json' de dentro de cada item\n  const dados = item.json;\n\n  // --- 1. Contagem por Data (agrupando pelo dia) ---\n  const dataCompleta = dados.created_at;\n  if (dataCompleta) {\n    // Pega apenas a parte da data (ex: \"2025-10-25\")\n    const dataCurta = dataCompleta.split('T')[0]; \n    contagemPorData[dataCurta] = (contagemPorData[dataCurta] || 0) + 1;\n  }\n\n  // --- 2. Contagem por Tabela ---\n  const tabela = dados.table_name;\n  if (tabela) {\n    contagemPorTabela[tabela] = (contagemPorTabela[tabela] || 0) + 1;\n  }\n\n  // --- 3. Contagem por Ação ---\n  const acao = dados.action;\n  if (acao) {\n    contagemPorAcao[acao] = (contagemPorAcao[acao] || 0) + 1;\n  }\n}\n\n// Retorna um novo objeto único com todos os cálculos\nreturn {\n  total_logs: totalLogs,\n  logs_por_data: contagemPorData,\n  logs_por_tabela: contagemPorTabela,\n  logs_por_acao: contagemPorAcao\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        1968
+      ],
+      "id": "5faf8314-992e-4bbf-b0f0-212127c17b42",
+      "name": "Quantidade de Log"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        720,
+        2192
+      ],
+      "id": "438ed251-2817-4d9a-9a4f-023434959048",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4722dbe0-5ba6-45d9-997e-829c23658d51",
+              "name": "relatorio",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2160,
+        1616
+      ],
+      "id": "9a83bb9b-32b3-4692-89ce-805faf2cd077",
+      "name": "Output Relatorio"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1936,
+        1520
+      ],
+      "id": "dc14dcc6-a3a8-48aa-b269-4e1d2309db32",
+      "name": "Loop Over Items3"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        1520
+      ],
+      "id": "b6ca8803-ab6a-4c46-9c36-e7a9384424a2",
+      "name": "Split Out3"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1424,
+        1504
+      ],
+      "id": "53d336c1-9a91-4fa2-b229-b363d903aab5",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        2480
+      ],
+      "id": "1cbef72b-7d44-4a8f-9a73-3ce42c4b248a",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "description",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        432,
+        2512
+      ],
+      "id": "19a29aa1-99e4-4d82-b10b-aacc5f926fc5",
+      "name": "Split Out4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        720,
+        2512
+      ],
+      "id": "0e6b0d8e-57f0-44ef-8381-759d908aeeda",
+      "name": "Loop Over Items4"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        1280
+      ],
+      "id": "b87275a1-8156-45f3-ad51-edab322b9889",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        1680
+      ],
+      "id": "985f5e32-3e98-4493-b4a9-847099dc9f4e",
+      "name": "Google Gemini Chat Model5",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        2080
+      ],
+      "id": "8b665d5c-eb69-46e1-9a36-cdc3a0a97450",
+      "name": "Google Gemini Chat Model6",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        2880
+      ],
+      "id": "c0327146-5c81-4135-b237-f9ac799b1253",
+      "name": "Google Gemini Chat Model7",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        2656
+      ],
+      "id": "f12f027a-21fb-4046-a35f-e9ae377db2e1",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "tableId": "texto_incidente",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "solucao_incidente",
+              "fieldValue": "={{ $json.output }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        2656
+      ],
+      "id": "a493a2b9-b460-49ad-a43c-93838ecd35fc",
+      "name": "Registro Texto Incidente",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "analise_incidente",
+        "options": {
+          "systemMessage": "=# PAPEL\nVocê é um Analista Técnico Sênior. Sua função é processar logs brutos, identificar a causa raiz dos eventos e gerar um relatório consolidado que seja técnico, preciso, mas direto ao ponto.\n\n# DADOS DE ENTRADA\n\"\"\"\n{{ $json.output }}\n\"\"\"\n\n# INSTRUÇÕES DE PROFUNDIDADE\n1. **Analise o Contexto:** Não diga apenas \"houve um erro\". Diga *qual* erro, em *qual* componente (ex: Banco de Dados, API, Servidor).\n2. **Identifique Padrões:** Se houver múltiplos eventos, identifique se são isolados ou sistêmicos.\n3. **Extraia Dados Chave:** Se houver nomes de servidores, códigos de erro (ex: 404, 500) ou tempos de resposta altos, inclua-os na análise.\n\n# FORMATO DE RESPOSTA (ESTRITO - TEXTO PURO)\nSiga esta estrutura exata, sem usar markdown (negrito/itálico) e sem emojis. Use apenas hifens (-) para listas:\n\nTITULO: [Resumo executivo do evento em 3 a 6 palavras]\nANALISE: [Explicação completa do cenário. Descreva o que aconteceu, a causa provável e o impacto. Seja técnico mas claro.]\nPONTOS CRITICOS:\n- [Liste o dado técnico relevante 1, ex: IP ou erro específico]\n- [Liste o dado técnico relevante 2]\nSTATUS: [Situação Final]\n\n# EXEMPLO DE SAÍDA ESPERADA\nTITULO: Falha de Conectividade no Servidor Financeiro\nANALISE: Detectada instabilidade recorrente na API de pagamentos. Os logs indicam timeout de conexao com o banco de dados principal, sugerindo sobrecarga ou falha de rede na porta 5432.\nPONTOS CRITICOS:\n- Erro predominante: Connection Refused (TCP)\n- Servidor afetado: 192.168.1.50\nSTATUS: Crítico - Intervenção Necessária"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1008,
+        2256
+      ],
+      "id": "43170192-d2d6-4530-af87-e09777222cde",
+      "name": "Analisador Incidente"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "analise_dados",
+        "options": {
+          "systemMessage": "=# PERSONA\nVocê é um Analista de Gerenciamento de Configuração (CMDB) Sênior. Seu trabalho é garantir a saúde, precisão e equilíbrio do nosso inventário de ativos (ICs).\n\n# OBJETIVO\nAnalisar os dados de log para identificar atividades suspeitas, picos de volume e \"hotspots\" (tabelas/ações) que possam indicar um problema de performance ou segurança.\n\n# DADOS DE ENTRADA (Contexto)\nO usuário fornecerá:\n- Total de Logs\n- Contagem de logs por Data\n- Contagem de logs por Tabela (ex: 'usuarios', 'produtos')\n- Contagem de logs por Ação (ex: 'INSERT', 'UPDATE', 'DELETE')\n\n# ESTRUTURA DA RESPOSTA\nGere um relatório em Português-BR usando este formato Markdown:\n\n## 📜 Relatório de Auditoria e Logs\n\n**Resumo Executivo:**\n- **Total de Eventos de Log:** [Total]\n\n**Análise de Risco (Ações):**\n- [Liste as ações e suas contagens, ex: INSERT: 5000, DELETE: 150]\n- ⚠️ **Alerta:** [Foque em ações destrutivas. Ex: \"Detectei 150 ações 'DELETE'. Este número é normal ou representa um risco?\"]\n- **Recomendação:** \"Auditar a origem das 150 ações 'DELETE' para garantir que foram legítimas.\"\n\n**Análise de Hotspot (Tabelas):**\n- [Liste as 3 tabelas mais acessadas, ex: 'login_attempts': 3000]\n- **Insight:** [Identifique gargalos. Ex: \"A tabela 'login_attempts' está sofrendo 3000 escritas, indicando um possível gargalo de performance ou um ataque de brute force.\"]\n\n**Análise de Volume (Temporal):**\n- [Analise a 'Contagem por data']\n- **Insight:** [Procure picos. Ex: \"Houve um pico anormal de 10.000 logs em '11/11/2025'. Isso coincide com algum deploy ou falha?\"]\n- **Recomendação:** \"Correlacionar o pico de logs de '11/11' com os incidentes abertos nesse dia para encontrar a causa raiz.\"\n\nRelatório de Logs:\n- Total de logs: {{ $json.total_logs }}\n- Contagem por data: {{ Object.entries($json.logs_por_data).map(([nome, total]) => `  - ${nome}: ${total}`).join('\\n') }}\n- Contagem de log por tabela: {{ Object.entries($json.logs_por_tabela).map(([nome, total]) => `  - ${nome}: ${total}`).join('\\n') }}\n- Contagem de log por ação: {{ Object.entries($json.logs_por_acao).map(([nome, total]) => `  - ${nome}: ${total}`).join('\\n') }}\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        656,
+        1968
+      ],
+      "id": "35150776-5849-42c8-bb38-021ba9408885",
+      "name": "AI Processa Logs"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "analise_dados",
+        "options": {
+          "systemMessage": "=# PERSONA\nVocê é um Analista de Gerenciamento de Configuração (CMDB) Sênior. Seu trabalho é garantir a saúde, precisão e equilíbrio do nosso inventário de ativos (ICs).\n\n# OBJETIVO\nAnalisar os dados brutos de incidentes e identificar gargalos, riscos e tendências de prioridade. Seja direto e focado na resolução.\n\n# DADOS DE ENTRADA (Contexto)\nO usuário fornecerá:\n- Total de Incidentes\n- Incidentes por Status (Aberto, Fechado, etc.)\n- Incidentes por Usuário (quem abriu)\n- Incidentes por Prioridade (Crítica, Alta, etc.)\n\n# ESTRUTURA DA RESPOSTA\nGere um relatório em Português-BR usando este formato Markdown:\n\n## 🔥 Relatório Operacional de Incidentes\n\n**Resumo Executivo:**\n- **Total de Incidentes:** [Total]\n- **Backlog Atual (Em Aberto/Pendente):** [Soma dos incidentes com status não resolvido]\n\n**Análise de Fila (Status):**\n- [Liste os status e suas contagens, ex: Aberto: 15, Fechado: 5]\n- **Insight:** [Foque no que está parado. Ex: \"Temos um backlog preocupante de 15 incidentes abertos. Nossa taxa de resolução está baixa.\"]\n- **Recomendação:** [Ação imediata. Ex: \"Priorizar imediatamente a triagem desses 15 incidentes.\"]\n\n**Análise de Impacto (Prioridade):**\n- [Liste as prioridades e suas contagens, ex: Crítica: 5, Alta: 10]\n- **Insight:** [Analise o risco. Ex: \"O volume de 5 incidentes críticos é alarmante e indica instabilidade séria no ambiente.\"]\n\n**Análise de Origem (Usuários):**\n- [Liste os 3 principais IDs de usuários que mais abriram incidentes]\n- **Insight:** [Procure padrões. Ex: \"O usuário ID '501' (provavelmente um sistema/API) abriu 40% dos incidentes, sugerindo uma falha de integração.\"]\n- **Recomendação:** [Ação investigativa. Ex: \"Investigar o sistema por trás do ID '501' e os 5 incidentes críticos com urgência.\"]\n\nRelatório de Incidentes:\n- Total de incidentes: {{ $json.total_incidentes }}\n- Incidentes por status: {{ Object.entries($json.incidentes_por_status).map(([nome, total]) => `  - ${nome}: ${total}`).join('\\n') }}\n- Incidentes por usuário id: {{ Object.entries($json.incidentes_por_usuario).map(([nome, total]) => `  - ${nome}: ${total}`).join('\\n') }}\n- Incidentes por prioridade: {{ Object.entries($json.incidentes_por_prioridade).map(([nome, total]) => `  - ${nome}: ${total}`).join('\\n') }}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        656,
+        1456
+      ],
+      "id": "52a59cca-ef68-4d87-9a36-cb8efa4d1047",
+      "name": "AI Processa Incidentes"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "analise_dados",
+        "options": {
+          "systemMessage": "=# PERSONA\nVocê é um Analista de Gerenciamento de Configuração (CMDB) Sênior. Seu trabalho é garantir a saúde, precisão e equilíbrio do nosso inventário de ativos (ICs).\n\n# OBJETIVO 1\nAnalisar os dados brutos do inventário e transformá-los em um relatório de insights acionáveis. Foque em riscos e desequilíbrios.\n\n# DADOS DE ENTRADA (Contexto)\nO usuário fornecerá:\n- Total de Itens\n- Contagem de itens por Responsável\n- Contagem de itens criados por Data\n\n# ESTRUTURA DA RESPOSTA\nGere um relatório em Português-BR usando este formato Markdown:\n\n## 📊 Relatório de Saúde do CMDB (ICs)\n\n**Resumo Executivo:**\n- **Total de Ativos:** [Total de itens]\n\n**Análise de Responsabilidade (Proprietários):**\n- [Liste os 3 principais responsáveis e suas contagens]\n- **Insight:** [Analise a distribuição. Ex: \"Notei que 'João Silva' possui 80% dos ativos, indicando um possível risco de centralização ou um ponto único de falha.\"]\n- **Recomendação:** [Sugira uma ação. Ex: \"Recomendo auditar os ativos do João para garantir que todos ainda estão corretos ou redistribuir a responsabilidade.\"]\n\n**Análise de Crescimento (Novos Itens):**\n- [Analise os dados da 'Contagem por data']\n- **Insight:** [Identifique picos ou tendências. Ex: \"Houve um pico de 30 novos itens em '10/11/2025'. Isso foi resultado de um novo projeto ou uma importação em massa?\"]\n- **Recomendação:** [Sugira uma ação. Ex: \"Verificar a origem dos 30 itens para garantir que foram catalogados corretamente.\"]\n\nRelatório de ICs:\n- Total de intens: {{ $json.total_itens_contados }}\n- Contagem por responsavel: {{ Object.entries($json.contagem_por_responsavel).map(([nome, total]) => `  - ${nome}: ${total}`).join('\\n') }}\n- Contagem por data: {{ Object.entries($json.contagem_por_data).map(([nome, total]) => `  - ${nome}: ${total}`).join('\\n') }}\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        656,
+        1056
+      ],
+      "id": "6faacb9f-0898-4a01-9f11-174e2281cd16",
+      "name": "AI Processa IC"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "analise_dados",
+        "options": {
+          "systemMessage": "=# PAPEL\nVocê é um Analista de Suporte Nível 2. Sua função é receber uma lista de logs de múltiplos incidentes, analisar cada um individualmente e fornecer um diagnóstico técnico com proposta de solução.\n\n# DADOS DE ENTRADA (LISTA JSON)\n\"\"\"\n{{ JSON.stringify($json.data) }}\n\"\"\"\n\n# INSTRUÇÕES DE ANÁLISE\n1. **Iteração:** Leia cada objeto dentro da lista de dados fornecida.\n2. **Diagnóstico:** Para cada item, identifique o problema central (Causa Raiz).\n3. **Proatividade:** Baseado no erro, sugira uma solução técnica viável (ex: reiniciar serviço, verificar firewall, corrigir query SQL).\n\n# FORMATO DE RESPOSTA (ESTRITO)\nPara CADA incidente encontrado, gere exatamente o bloco abaixo. Separe os blocos com uma linha tracejada. Não use Markdown (negrito/itálico).\n\nINCIDENTE [Número Sequencial]\nTITULO: [Resumo curto do problema]\nRESUMO: [Explicação breve do que aconteceu e qual componente falhou]\nPONTOS CHAVE:\n- [Dado técnico 1, ex: IP ou Erro]\n- [Dado técnico 2]\nSOLUCAO SUGERIDA: [Ação recomendada para resolver o problema]\n-----------------------------------\n\n# EXEMPLO DE SAÍDA ESPERADA\nINCIDENTE 1\nTITULO: Falha de Login no CRM\nRESUMO: Usuários reportam timeout ao tentar autenticar. O log indica falha de comunicação com o servidor LDAP.\nPONTOS CHAVE:\n- Erro: Timeout (Error 504)\n- Serviço: Auth-Service\nSOLUCAO SUGERIDA: Verificar status do serviço LDAP e conectividade da porta 389.\n-----------------------------------\nINCIDENTE 2\nTITULO: Disco Cheio no Servidor de Arquivos\n..."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1360,
+        2656
+      ],
+      "id": "40dae1e3-40ad-464b-971d-7a21ffa43b18",
+      "name": "Agente Filtro4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "=# PAPEL\nVocê é um Analista Técnico Sênior. Sua função é processar logs brutos, identificar a causa raiz dos eventos e gerar um relatório consolidado que seja técnico, preciso, mas direto ao ponto.\n\n# DADOS DE ENTRADA\n\"\"\"\n{{ $json.output }}\n\"\"\"\n\n# INSTRUÇÕES DE PROFUNDIDADE\n1. **Analise o Contexto:** Não diga apenas \"houve um erro\". Diga *qual* erro, em *qual* componente (ex: Banco de Dados, API, Servidor).\n2. **Identifique Padrões:** Se houver múltiplos eventos, identifique se são isolados ou sistêmicos.\n3. **Extraia Dados Chave:** Se houver nomes de servidores, códigos de erro (ex: 404, 500) ou tempos de resposta altos, inclua-os na análise.\n\n# FORMATO DE RESPOSTA (ESTRITO - TEXTO PURO)\nSiga esta estrutura exata, sem usar markdown (negrito/itálico) e sem emojis. Use apenas hifens (-) para listas:\n\nTITULO: [Resumo executivo do evento em 3 a 6 palavras]\nANALISE: [Explicação completa do cenário. Descreva o que aconteceu, a causa provável e o impacto. Seja técnico mas claro.]\nPONTOS CRITICOS:\n- [Liste o dado técnico relevante 1, ex: IP ou erro específico]\n- [Liste o dado técnico relevante 2]\nSTATUS: [Situação Final]\n\n# EXEMPLO DE SAÍDA ESPERADA\nTITULO: Falha de Conectividade no Servidor Financeiro\nANALISE: Detectada instabilidade recorrente na API de pagamentos. Os logs indicam timeout de conexao com o banco de dados principal, sugerindo sobrecarga ou falha de rede na porta 5432.\nPONTOS CRITICOS:\n- Erro predominante: Connection Refused (TCP)\n- Servidor afetado: 192.168.1.50\nSTATUS: Crítico - Intervenção Necessária"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1008,
+        1856
+      ],
+      "id": "6db0d401-d2b7-446f-8bd3-9fe10f8fc68b",
+      "name": "Agente Filtro3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "=# PAPEL\nVocê é um Analista Técnico Sênior. Sua função é processar logs brutos, identificar a causa raiz dos eventos e gerar um relatório consolidado que seja técnico, preciso, mas direto ao ponto.\n\n# DADOS DE ENTRADA\n\"\"\"\n{{ $json.output }}\n\"\"\"\n\n# INSTRUÇÕES DE PROFUNDIDADE\n1. **Analise o Contexto:** Não diga apenas \"houve um erro\". Diga *qual* erro, em *qual* componente (ex: Banco de Dados, API, Servidor).\n2. **Identifique Padrões:** Se houver múltiplos eventos, identifique se são isolados ou sistêmicos.\n3. **Extraia Dados Chave:** Se houver nomes de servidores, códigos de erro (ex: 404, 500) ou tempos de resposta altos, inclua-os na análise.\n\n# FORMATO DE RESPOSTA (ESTRITO - TEXTO PURO)\nSiga esta estrutura exata, sem usar markdown (negrito/itálico) e sem emojis. Use apenas hifens (-) para listas:\n\nTITULO: [Resumo executivo do evento em 3 a 6 palavras]\nANALISE: [Explicação completa do cenário. Descreva o que aconteceu, a causa provável e o impacto. Seja técnico mas claro.]\nPONTOS CRITICOS:\n- [Liste o dado técnico relevante 1, ex: IP ou erro específico]\n- [Liste o dado técnico relevante 2]\nSTATUS: [Situação Final]\n\n# EXEMPLO DE SAÍDA ESPERADA\nTITULO: Falha de Conectividade no Servidor Financeiro\nANALISE: Detectada instabilidade recorrente na API de pagamentos. Os logs indicam timeout de conexao com o banco de dados principal, sugerindo sobrecarga ou falha de rede na porta 5432.\nPONTOS CRITICOS:\n- Erro predominante: Connection Refused (TCP)\n- Servidor afetado: 192.168.1.50\nSTATUS: Crítico - Intervenção Necessária"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1008,
+        1456
+      ],
+      "id": "39635bab-41f7-4c6c-8e3f-1d7271177bab",
+      "name": "Agente Filtro2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "=# PAPEL\nVocê é um Analista Técnico Sênior. Sua função é processar logs brutos, identificar a causa raiz dos eventos e gerar um relatório consolidado que seja técnico, preciso, mas direto ao ponto.\n\n# DADOS DE ENTRADA\n\"\"\"\n{{ $json.output }}\n\"\"\"\n\n# INSTRUÇÕES DE PROFUNDIDADE\n1. **Analise o Contexto:** Não diga apenas \"houve um erro\". Diga *qual* erro, em *qual* componente (ex: Banco de Dados, API, Servidor).\n2. **Identifique Padrões:** Se houver múltiplos eventos, identifique se são isolados ou sistêmicos.\n3. **Extraia Dados Chave:** Se houver nomes de servidores, códigos de erro (ex: 404, 500) ou tempos de resposta altos, inclua-os na análise.\n\n# FORMATO DE RESPOSTA (ESTRITO - TEXTO PURO)\nSiga esta estrutura exata, sem usar markdown (negrito/itálico) e sem emojis. Use apenas hifens (-) para listas:\n\nTITULO: [Resumo executivo do evento em 3 a 6 palavras]\nANALISE: [Explicação completa do cenário. Descreva o que aconteceu, a causa provável e o impacto. Seja técnico mas claro.]\nPONTOS CRITICOS:\n- [Liste o dado técnico relevante 1, ex: IP ou erro específico]\n- [Liste o dado técnico relevante 2]\nSTATUS: [Situação Final]\n\n# EXEMPLO DE SAÍDA ESPERADA\nTITULO: Falha de Conectividade no Servidor Financeiro\nANALISE: Detectada instabilidade recorrente na API de pagamentos. Os logs indicam timeout de conexao com o banco de dados principal, sugerindo sobrecarga ou falha de rede na porta 5432.\nPONTOS CRITICOS:\n- Erro predominante: Connection Refused (TCP)\n- Servidor afetado: 192.168.1.50\nSTATUS: Crítico - Intervenção Necessária"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1008,
+        1056
+      ],
+      "id": "ff6eaeae-244a-4fdc-b96c-578854edce47",
+      "name": "Agente Filtro1"
+    },
+    {
+      "parameters": {
+        "tableId": "texto_relatorio",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "relatorio",
+              "fieldValue": "={{ $json.texto_final }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2608,
+        1424
+      ],
+      "id": "33f6e39e-96e3-4da6-8882-4ec1142410bb",
+      "name": "Registro Texto Relatorio",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        1424
+      ],
+      "id": "909aee9b-b495-476f-902a-4fc99c672f51",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "content": "## Coleta de dados do sistema",
+        "height": 256,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        2416
+      ],
+      "id": "163880d0-763c-4e1e-aa72-4d1a215c1865",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Agentes LLMs para analise  e filtro do texto.",
+        "height": 1872,
+        "width": 640,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        944
+      ],
+      "id": "0ab33079-590a-4ab1-8522-2ce8fa005227",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Processamento e registro na base.",
+        "height": 480,
+        "width": 640,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        2576
+      ],
+      "id": "d8c48d98-0a8b-4f09-a39c-f3f7bedf8da9",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Processamento e registro na base.",
+        "height": 496,
+        "width": 1504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        1328
+      ],
+      "id": "88d3de8f-b42b-4309-b45b-d1abafb20e3e",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        720,
+        1280
+      ],
+      "id": "ecead2bb-3a42-4959-a1b3-34cc13687421",
+      "name": "Google Gemini Chat Model8",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        720,
+        1680
+      ],
+      "id": "69612cb5-9c5d-486a-bc87-140c6f176f4e",
+      "name": "Google Gemini Chat Model9",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "incidents",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        2512
+      ],
+      "id": "e1a724b3-853f-45ba-b487-0841afff33c8",
+      "name": "Get many rows1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Pega o array de dados gerado pelo nó Aggregate\n// Baseado na sua imagem, os itens estão dentro de \"json.data\"\nconst listaItens = items[0].json.data;\n\n// 2. Transforma a lista em um único texto\n// O código verifica se o campo se chama 'relatorio' (como no aggregate) ou 'output' (como no loop)\nconst textoUnico = listaItens.map((item, index) => {\n  const conteudo = item.relatorio || item.output || \"Sem conteúdo\";\n  return `RELATÓRIO ${index + 1} \\n${conteudo}`;\n}).join('\\n\\n-----------------------------------\\n\\n');\n\n// 3. Retorna um único item contendo o texto completo\nreturn [\n  {\n    json: {\n      nome_arquivo: \"relatorio_consolidado.txt\",\n      texto_final: textoUnico\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2384,
+        1424
+      ],
+      "id": "3bb8ce13-aa87-4570-a75a-ece2adbf0c2a",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "content": "## Coleta de dados do sistema",
+        "height": 256,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        1088
+      ],
+      "id": "5ff73d05-55c1-4589-a3b1-351f1e2dbf1a",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Coleta de dados do sistema",
+        "height": 256,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        1488
+      ],
+      "id": "f0499dbe-2e48-4242-b6d6-b58988000d24",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## Coleta de dados do sistema",
+        "height": 256,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        1872
+      ],
+      "id": "b853619d-5f96-45e9-a86e-3f7475668973",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "64ec19c0-a59d-47a7-a0c0-25dcc17487ed",
+              "name": "numero_serial",
+              "value": "={{ $json.body.serialNumber }}",
+              "type": "string"
+            },
+            {
+              "id": "44f5dc25-6624-4094-b2d5-72d8b1e79acd",
+              "name": "nome_licenca",
+              "value": "={{ $json.body.licencaWindows.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "306d44c1-1f47-40cc-9d24-e29397f4577c",
+              "name": "status_licenca",
+              "value": "={{ $json.body.licencaWindows.LicenseStatus }}",
+              "type": "string"
+            },
+            {
+              "id": "fd7b28d5-6562-4dab-a2fb-b5f6528d3ff2",
+              "name": "data_expiracao",
+              "value": "={{ $json.body.licencaWindows.ExpirationDate }}",
+              "type": "string"
+            },
+            {
+              "id": "5d6ba6f6-012b-4511-9f52-665f5b4f1656",
+              "name": "memoria_ram",
+              "value": "={{ $json.body.memoriaRAM_GB }}",
+              "type": "string"
+            },
+            {
+              "id": "69da71a9-bba4-443a-9294-78d1e630c0e4",
+              "name": "host_name",
+              "value": "={{ $json.body.hostname }}",
+              "type": "string"
+            },
+            {
+              "id": "fbefe410-b182-4657-9199-bb61bd40734b",
+              "name": "numero_ip",
+              "value": "={{ $json.body.ipAddress }}",
+              "type": "string"
+            },
+            {
+              "id": "9faa86d0-616b-4f41-af72-6c05a214d9e7",
+              "name": "sistema_operacional",
+              "value": "={{ $json.body.sistemaOperacional }}",
+              "type": "string"
+            },
+            {
+              "id": "acdb8292-7215-4e96-8e8b-3396ec42ef2a",
+              "name": "cpu",
+              "value": "={{ $json.body.cpu }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3568,
+        -16
+      ],
+      "id": "1470999f-1547-4813-8821-b8588fba39fb",
+      "name": "Coletar Dados"
+    },
+    {
+      "parameters": {
+        "tableId": "configuration_items",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "=PC {{ Math.floor(Math.random() * 1000) + 1 }}"
+            },
+            {
+              "fieldId": "item_type",
+              "fieldValue": "Desktop"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Ativo"
+            },
+            {
+              "fieldId": "environment",
+              "fieldValue": "Produção"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "total_memory_gb",
+              "fieldValue": "={{ $json.memoria_ram }}"
+            },
+            {
+              "fieldId": "os",
+              "fieldValue": "={{ $json.sistema_operacional }}"
+            },
+            {
+              "fieldId": "item_owner",
+              "fieldValue": "Bruno Alessandro Bosso Alves"
+            },
+            {
+              "fieldId": "ip_address",
+              "fieldValue": "={{ $json.numero_ip }}"
+            },
+            {
+              "fieldId": "licenca_windows",
+              "fieldValue": "={{ $json.nome_licenca }}"
+            },
+            {
+              "fieldId": "status_licenca",
+              "fieldValue": "={{ $json.status_licenca }}"
+            },
+            {
+              "fieldId": "data_expiracao",
+              "fieldValue": "={{ $json.data_expiracao }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3792,
+        -16
+      ],
+      "id": "2a6679a7-4ebe-41e3-a951-c10a5fd3ea76",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "text": "Opa! Identificamos um problema ao salvar as informações no NEXUS CMDB. Por favor, tente registrar a máquina novamente.",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-waha.WAHA",
+      "typeVersion": 202411,
+      "position": [
+        4016,
+        -16
+      ],
+      "id": "61b5a57b-2e13-4545-a84c-56a7fc18d081",
+      "name": "Send a text message",
+      "credentials": {
+        "wahaApi": {
+          "id": "HSoeDT2Ver7ckuut",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "Erro ao cadastrar máquina"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        4240,
+        -16
+      ],
+      "id": "2f30c134-7ec1-4518-9652-f86490210ed3",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d531f600-61a9-4f62-916f-69152adc3d8c",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        3344,
+        -16
+      ],
+      "id": "334b57db-0bc2-4cb0-85f9-ed771da64976",
+      "name": "Webhook1",
+      "webhookId": "d531f600-61a9-4f62-916f-69152adc3d8c",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        4128,
+        496
+      ],
+      "id": "7aefc12d-eca7-44f7-b387-0494b9cbab0e",
+      "name": "When Executed by Another Workflow",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5dee9468-94f1-467a-b75b-9c7531e7ff72",
+              "name": "Nome",
+              "value": "={{ $json.hostname }}",
+              "type": "string"
+            },
+            {
+              "id": "fbbaa9f8-ddde-47c8-b9c2-066dbefad467",
+              "name": "Tipo",
+              "value": "Servidor",
+              "type": "string"
+            },
+            {
+              "id": "fef874be-bcd6-4879-b850-cdde39bb1e17",
+              "name": "Status",
+              "value": "Ativo",
+              "type": "string"
+            },
+            {
+              "id": "a55d1cc4-c5ae-4961-b6f4-ee4bd2d0a4aa",
+              "name": "Ambiente",
+              "value": "Produção",
+              "type": "string"
+            },
+            {
+              "id": "2de0a872-d489-4c46-9547-8ab447693316",
+              "name": "cpu_cores",
+              "value": "={{ $json.cpu_cores }}",
+              "type": "string"
+            },
+            {
+              "id": "6a379e3c-9d42-4958-acea-cb14379fae6d",
+              "name": "cpu_threads",
+              "value": "={{ $json.cpu_threads }}",
+              "type": "string"
+            },
+            {
+              "id": "6c1d4388-2c36-4529-a219-de2fdbf8ecae",
+              "name": "endereco_ip",
+              "value": "={{ $json.endereco_ip }}",
+              "type": "string"
+            },
+            {
+              "id": "51f9b652-6906-489a-bf7d-9cc730025fc9",
+              "name": "hostname",
+              "value": "={{ $json.hostname }}",
+              "type": "string"
+            },
+            {
+              "id": "c720318a-9bca-429d-9757-2836341e85f6",
+              "name": "kernel_version",
+              "value": "={{ $json.kernel_version }}",
+              "type": "string"
+            },
+            {
+              "id": "c06a4e08-a8e8-4bc3-baef-b75c62b56cf1",
+              "name": "memoria_livre_gb",
+              "value": "={{ $json.memoria_livre_gb }}",
+              "type": "string"
+            },
+            {
+              "id": "ccdd5889-6dbd-4065-9a0c-5297ef06de91",
+              "name": "memoria_total_gb",
+              "value": "={{ $json.memoria_total_gb }}",
+              "type": "string"
+            },
+            {
+              "id": "de540a23-f883-4c93-b4b5-ca9d7cf8a522",
+              "name": "memoria_usada_percent",
+              "value": "={{ $json.memoria_usada_percent }}",
+              "type": "string"
+            },
+            {
+              "id": "597443e5-fe1e-4aed-acea-fb9da8336ea3",
+              "name": "sistema_operacional",
+              "value": "={{ $json.sistema_operacional }}",
+              "type": "string"
+            },
+            {
+              "id": "5a57e03f-8b2a-425e-ad7e-8909814a699d",
+              "name": "disco_disponivel_gb",
+              "value": "={{ $json.disco_disponivel_gb }}",
+              "type": "string"
+            },
+            {
+              "id": "316e55ef-4605-447f-bd38-39ab019ac47b",
+              "name": "disco_total_gb",
+              "value": "={{ $json.disco_total_gb }}",
+              "type": "string"
+            },
+            {
+              "id": "93aaa7cd-1a51-4eab-9d38-482f26ff721a",
+              "name": "uso_cpu_atual",
+              "value": "={{ $json.uso_cpu_atual }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4544,
+        496
+      ],
+      "id": "a02ba67c-14f7-48fc-a056-b58d9665f8f7",
+      "name": "Dados Coletados"
+    },
+    {
+      "parameters": {
+        "tableId": "configuration_items",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "=SRV-{{ Math.floor(Math.random() * 1000) + 1 }}"
+            },
+            {
+              "fieldId": "item_type",
+              "fieldValue": "={{ $json.Tipo }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.Status }}"
+            },
+            {
+              "fieldId": "environment",
+              "fieldValue": "={{ $json.Ambiente }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $now }}"
+            },
+            {
+              "fieldId": "cpu_threads",
+              "fieldValue": "={{ $json.cpu_threads }}"
+            },
+            {
+              "fieldId": "cpu_core",
+              "fieldValue": "={{ $json.cpu_cores }}"
+            },
+            {
+              "fieldId": "ip_address",
+              "fieldValue": "={{ $json.endereco_ip }}"
+            },
+            {
+              "fieldId": "host_name",
+              "fieldValue": "={{ $json.hostname }}"
+            },
+            {
+              "fieldId": "kernel_version",
+              "fieldValue": "={{ $json.kernel_version }}"
+            },
+            {
+              "fieldId": "free_memory_gb",
+              "fieldValue": "={{ $json.memoria_livre_gb }}"
+            },
+            {
+              "fieldId": "total_memory_gb",
+              "fieldValue": "={{ $json.memoria_total_gb }}"
+            },
+            {
+              "fieldId": "used_memory_percentage",
+              "fieldValue": "={{ $json.memoria_usada_percent }}"
+            },
+            {
+              "fieldId": "os",
+              "fieldValue": "={{ $json.sistema_operacional }}"
+            },
+            {
+              "fieldId": "storage_available",
+              "fieldValue": "={{ $json.disco_disponivel_gb }}"
+            },
+            {
+              "fieldId": "storage_total",
+              "fieldValue": "={{ $json.disco_total_gb }}"
+            },
+            {
+              "fieldId": "current_cpu_usage",
+              "fieldValue": "={{ $json.uso_cpu_atual }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4752,
+        496
+      ],
+      "id": "316abc0a-a54a-4d36-9a82-e5f4228c8316",
+      "name": "Registrar Servidor",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Este é o código para um nó \"Code\" do N8N\n// Ele espera que o item de entrada tenha a estrutura que você forneceu:\n// items[0].stdout = \"PLAY [Coletar informa??es...\"\n\nconst newItems = [];\n\n// Processa cada item que chega ao nó\nfor (const item of items) {\n  try {\n    // 1. Pega a string completa do log do stdout\n    // O seu JSON de exemplo é o próprio item, então acessamos 'item.stdout'\n    // Se o seu dado estiver dentro de 'json' (ex: item.json.stdout), ajuste a linha abaixo.\n    const stdout = $input.first().json.stdout;\n\n    if (!stdout) {\n      throw new Error(\"A propriedade 'stdout' não foi encontrada ou está vazia.\");\n    }\n\n    // 2. Define a RegEx para encontrar o bloco JSON da tarefa de debug\n    // Esta RegEx procura:\n    // - O texto \"TASK [Exibir dados (debug)]\"\n    // - Seguido pela linha \"ok: [localhost] => \"\n    // - Captura (grupo 1) o bloco JSON que começa com { e termina com }\n    //   antes da próxima \"TASK\"\n    const regex = /TASK \\[Exibir dados \\(debug\\)\\][^\\n]*\\n[^\\n]* => (\\{.*?\\n\\})\\n\\nTASK/s;\n\n    // 3. Executa a RegEx na string do stdout\n    const match = stdout.match(regex);\n\n    // 4. Verifica se encontrou o JSON\n    if (!match || !match[1]) {\n      throw new Error(\"Não foi possível encontrar o bloco JSON de 'payload_completo' no stdout.\");\n    }\n\n    // 5. Pega o JSON capturado (string) e o transforma em um objeto\n    const jsonString = match[1];\n    const parsedData = JSON.parse(jsonString);\n\n    // 6. Pega apenas o conteúdo de 'payload_completo'\n    const payload = parsedData.payload_completo;\n\n    if (!payload) {\n       throw new Error(\"'payload_completo' não encontrado no JSON extraído.\");\n    }\n\n    // 7. Cria um novo objeto simples (flat) para facilitar o uso\n    // Nós \"achatamos\" a estrutura para que você possa usar\n    // variáveis como {{ $json.hostname }} ou {{ $json.disco_total_gb }}\n    const outputData = {\n      ...payload.informacoes_sistema, // Adiciona todas as chaves de 'informacoes_sistema'\n      disco_disponivel_gb: payload.disco.disponivel_gb,\n      disco_total_gb: payload.disco.total_gb,\n      uso_cpu_atual: payload.uso_cpu_atual,\n    };\n\n    // 8. Adiciona o novo objeto formatado à saída do nó\n    // O N8N espera que os dados de saída estejam dentro de uma propriedade 'json'\n    newItems.push({\n      json: outputData\n    });\n\n  } catch (error) {\n    // Em caso de erro, loga a mensagem e retorna o erro\n    // Isso ajuda a depurar o workflow no N8N\n    console.error(\"Erro ao processar o item:\", error.message);\n    newItems.push({\n      json: { \n        error: error.message, \n        originalStdout: item.stdout ? item.stdout.substring(0, 500) + '...' : null \n      }\n    });\n  }\n}\n\n// Retorna os novos itens para o próximo nó do workflow\nreturn newItems;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4336,
+        496
+      ],
+      "id": "1905753a-27d7-4419-900d-0a99912f949f",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $('HTML').item.json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        3904,
+        992
+      ],
+      "id": "acc545b0-501a-4718-8460-76b69eae9fe2",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Agente Nexus CMDB</title>\n    <style>\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;\n            display: flex;\n            justify-content: center;\n            align-items: center;\n            height: 100vh;\n            margin: 0;\n            background-color: #DADBD3;\n        }\n\n        #chat-container {\n            width: 100%;\n            max-width: 800px;\n            background: #E5DDD5;\n            box-shadow: 0 4px 12px rgba(0,0,0,0.15);\n            border-radius: 3px;\n            display: flex;\n            flex-direction: column;\n            height: 95vh;\n            overflow: hidden;\n        }\n\n        #chat-header {\n            background-color: #075E54;\n            color: white;\n            padding: 10px 15px;\n            display: flex;\n            align-items: center;\n            justify-content: space-between;\n            flex-shrink: 0;\n        }\n\n        #chat-header .header-left {\n            display: flex;\n            align-items: center;\n        }\n\n        #chat-header .avatar {\n            width: 40px;\n            height: 40px;\n            background-color: #B0BEC5;\n            border-radius: 50%;\n            margin-right: 15px;\n            display: flex;\n            justify-content: center;\n            align-items: center;\n        }\n        \n        #chat-header .avatar svg {\n            width: 24px;\n            height: 24px;\n            fill: #FFFFFF;\n        }\n\n        #chat-header h3 {\n            margin: 0;\n            font-weight: 500;\n        }\n\n        #refresh-button {\n            background-color: transparent;\n            border: none;\n            color: white;\n            cursor: pointer;\n            padding: 8px;\n            border-radius: 50%;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            transition: background-color 0.2s;\n        }\n\n        #refresh-button:hover {\n            background-color: rgba(255, 255, 255, 0.1);\n        }\n\n        #refresh-button svg {\n            width: 24px;\n            height: 24px;\n            fill: white;\n        }\n\n        #chat-box {\n            flex: 1;\n            padding: 20px;\n            overflow-y: auto;\n            overflow-x: hidden;\n            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png' );\n            display: flex;\n            flex-direction: column;\n            gap: 10px;\n        }\n        \n        /* Ajustes para a imagem de fundo DENTRO das mensagens */\n        .message {\n            padding: 8px 12px;\n            border-radius: 7.5px;\n            line-height: 1.5;\n            box-shadow: 0 1px 1px rgba(0,0,0,0.05);\n            max-width: 70%;\n            width: fit-content;\n            position: relative;\n            word-wrap: break-word;\n            overflow-wrap: break-word;\n            white-space: pre-wrap;\n        }\n\n        /* A mágica da marca d'água acontece aqui */\n        .message::before {\n            content: '';\n            position: absolute;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png' );\n            background-size: contain;\n            background-repeat: no-repeat;\n            background-position: center;\n            opacity: 0.08;\n            z-index: 0;\n            pointer-events: none;\n        }\n\n        /* Garante que o texto fique ACIMA da marca d'água */\n        .message-content {\n            position: relative;\n            z-index: 1;\n        }\n\n        .message.agent {\n            background-color: #FFFFFF;\n            align-self: flex-start;\n        }\n\n        .message.user {\n            background-color: #DCF8C6;\n            align-self: flex-end;\n        }\n        \n        .timestamp {\n            font-size: 0.75rem;\n            color: #888;\n            margin-top: 5px;\n            text-align: right;\n            display: block;\n            position: relative;\n            z-index: 1;\n        }\n        \n        #chat-form {\n            display: flex;\n            padding: 10px;\n            background-color: #F0F0F0;\n            align-items: center;\n            flex-shrink: 0;\n        }\n\n        #message-input {\n            flex-grow: 1;\n            padding: 12px 15px;\n            border: none;\n            border-radius: 25px;\n            font-size: 1rem;\n        }\n        \n        #message-input:focus { outline: none; }\n\n        button#submit-button {\n            width: 50px;\n            height: 50px;\n            border: none;\n            background-color: #075E54;\n            color: white;\n            border-radius: 50%;\n            margin-left: 10px;\n            cursor: pointer;\n            display: flex;\n            justify-content: center;\n            align-items: center;\n            transition: background-color 0.2s;\n        }\n\n        button#submit-button:disabled {\n            background-color: #aaa;\n            cursor: not-allowed;\n        }\n        \n        button#submit-button:hover:not(:disabled) { background-color: #128C7E; }\n\n        button#submit-button svg {\n            width: 24px;\n            height: 24px;\n            fill: currentColor;\n        }\n\n        .typing-indicator {\n            padding: 8px 12px;\n            background-color: #FFF;\n            border-radius: 7.5px;\n            box-shadow: 0 1px 1px rgba(0,0,0,0.05);\n            align-self: flex-start;\n        }\n\n        .typing-indicator span {\n            height: 8px;\n            width: 8px;\n            background-color: #999;\n            border-radius: 50%;\n            display: inline-block;\n            margin: 0 1px;\n            animation: blink 1.4s infinite both;\n        }\n\n        .typing-indicator span:nth-child(2) { animation-delay: .2s; }\n        .typing-indicator span:nth-child(3) { animation-delay: .4s; }\n\n        @keyframes blink {\n            0% { opacity: .2; }\n            20% { opacity: 1; }\n            100% { opacity: .2; }\n        }\n\n        /* Customização da scrollbar */\n        #chat-box::-webkit-scrollbar {\n            width: 6px;\n        }\n\n        #chat-box::-webkit-scrollbar-track {\n            background: transparent;\n        }\n\n        #chat-box::-webkit-scrollbar-thumb {\n            background: rgba(0, 0, 0, 0.2);\n            border-radius: 3px;\n        }\n\n        #chat-box::-webkit-scrollbar-thumb:hover {\n            background: rgba(0, 0, 0, 0.3);\n        }\n\n    </style>\n</head>\n<body>\n    <div id=\"chat-container\">\n        <header id=\"chat-header\">\n            <div class=\"header-left\">\n                <div class=\"avatar\">\n                    <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M19.006,3.994c-4.009-4.01-10.518-4.01-14.527,0c-4.01,4.009-4.01,10.518,0,14.527c3.959,3.959,10.273,4.006,14.473,0.119l3.03,3.03l1.414-1.414l-3.025-3.025C22.95,14.633,23.004,8.385,19.006,3.994z M17.591,17.177c-3.268,3.268-8.564,3.268-11.832,0c-3.268-3.268-3.268-8.564,0-11.832c3.268-3.268,8.564-3.268,11.832,0C20.859,8.613,20.859,13.909,17.591,17.177z M12,8c-1.657,0-3,1.343-3,3s1.343,3,3,3s3-1.343,3-3S13.657,8,12,8z M12,12c-0.552,0-1-0.448-1-1s0.448-1,1-1s1,0.448,1,1S12.552,12,12,12z M13,14h-2v-1h2V14z M15,11h-1V9.5C14,9.224,13.776,9,13.5,9S13,9.224,13,9.5V11h-2V9.5C11,8.673,10.327,8,9.5,8S8,8.673,8,9.5V11H7v2h1v1.5C8,14.776,8.224,15,8.5,15S9,14.776,9,14.5V13h2v1.5c0,0.827,0.673,1.5,1.5,1.5s1.5-0.673,1.5-1.5V13h1V11z\"/></svg>\n                </div>\n                <h3>Agente IA Nexus CMDB</h3>\n            </div>\n            <button id=\"refresh-button\" title=\"Atualizar página\" onclick=\"location.reload( )\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z\"/></svg>\n            </button>\n        </header>\n\n        <div id=\"chat-box\"></div>\n\n        <form id=\"chat-form\">\n            <input type=\"text\" id=\"message-input\" placeholder=\"Digite uma mensagem...\" autocomplete=\"off\">\n            <button type=\"submit\" id=\"submit-button\" title=\"Enviar mensagem\">\n                <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M2.01 21L23 12 2.01 3 2 10l15 2-15 2z\"></path></svg>\n            </button>\n        </form>\n    </div>\n\n    <script>\n        const form = document.getElementById('chat-form' );\n        const input = document.getElementById('message-input');\n        const chatBox = document.getElementById('chat-box');\n        const submitButton = document.getElementById('submit-button');\n\n        const agentWebhookUrl = 'http://host.docker.internal:5678/webhook/6441aaf8-612f-42d6-b170-dbdde08b0c65'; \n\n        form.addEventListener('submit', async (e ) => {\n            e.preventDefault();\n            const userMessage = input.value.trim();\n            if (!userMessage) return;\n\n            addMessage(userMessage, 'user');\n            input.value = '';\n            input.focus();\n            submitButton.disabled = true;\n            \n            showTypingIndicator();\n\n            try {\n                const response = await fetch(agentWebhookUrl, {\n                    method: 'POST',\n                    headers: { 'Content-Type': 'application/json' },\n                    body: JSON.stringify({ message: userMessage })\n                });\n\n                if (!response.ok) throw new Error(`Erro na API: ${response.statusText}`);\n\n                const data = await response.json();\n                addMessage(data.reply, 'agent');\n\n            } catch (error) {\n                console.error('Falha ao contatar o agente:', error);\n                addMessage('Desculpe, não consegui processar sua mensagem. Por favor, tente novamente.', 'agent');\n            } finally {\n                hideTypingIndicator();\n                submitButton.disabled = false;\n            }\n        });\n\n        function addMessage(text, sender) {\n            const messageElement = document.createElement('div');\n            const messageContent = document.createElement('div');\n            const timeStamp = document.createElement('span');\n\n            messageElement.classList.add('message', sender);\n            messageContent.classList.add('message-content');\n            timeStamp.classList.add('timestamp');\n\n            // Converte \\n para quebras de linha reais\n            messageContent.textContent = text;\n            \n            const now = new Date();\n            timeStamp.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;\n\n            messageElement.appendChild(messageContent);\n            messageElement.appendChild(timeStamp);\n            \n            chatBox.appendChild(messageElement);\n            \n            // Scroll suave para o final\n            setTimeout(() => {\n                chatBox.scrollTop = chatBox.scrollHeight;\n            }, 100);\n        }\n\n        function showTypingIndicator() {\n            const indicator = document.createElement('div');\n            indicator.id = 'typing-indicator';\n            indicator.classList.add('typing-indicator');\n\n            for (let i = 0; i < 3; i++) {\n                indicator.appendChild(document.createElement('span'));\n            }\n\n            chatBox.appendChild(indicator);\n            setTimeout(() => {\n                chatBox.scrollTop = chatBox.scrollHeight;\n            }, 100);\n        }\n\n        function hideTypingIndicator() {\n            const indicator = document.getElementById('typing-indicator');\n            if (indicator) {\n                indicator.remove();\n            }\n        }\n    </script>\n</body>\n</html>"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        3680,
+        992
+      ],
+      "id": "890939e2-1e7a-4f2c-a3b0-957daa1d6076",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"reply\": \"{{ $('AI Agent2').item.json.output.replace(/\\n/g, '\\\\n').replace(/\"/g, '\\\\\"') }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        4672,
+        1328
+      ],
+      "id": "8731a33b-f755-4d1a-bca9-be2060b37255",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "6441aaf8-612f-42d6-b170-dbdde08b0c65",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        3504,
+        1328
+      ],
+      "id": "08c9adc4-9d48-4df3-bc0a-a2e0d50e1c44",
+      "name": "Webhook2",
+      "webhookId": "6441aaf8-612f-42d6-b170-dbdde08b0c65",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "nexus",
+        "sessionTTL": 3600,
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        3856,
+        1552
+      ],
+      "id": "a6865535-b429-44f6-9e8b-6f3795377b8d",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "RXGh26UeK9QGvktP",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4448,
+        1328
+      ],
+      "id": "9b668dcb-8205-40f7-8a85-9d3695ed0d05",
+      "name": "Wait",
+      "webhookId": "fb03899f-9066-435e-beff-1553df7de9fb"
+    },
+    {
+      "parameters": {
+        "tableId": "configuration_items",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Nome do Item que o usuário informou.`, 'string') }}"
+            },
+            {
+              "fieldId": "item_type",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `Tipo do item que o usuário informou.`, 'string') }}"
+            },
+            {
+              "fieldId": "environment",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Tipo do ambiente que o usuário informou.`, 'string') }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Ativo"
+            },
+            {
+              "fieldId": "item_owner",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues4_Field_Value', `Nome do usuário que será vinculado ao IC. (Obtido da tool BuscaUsers)`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        3984,
+        1552
+      ],
+      "id": "3684a286-4f08-4994-a845-b38b2d318ff0",
+      "name": "CriarIC",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "incidents",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Titulo do incidente que o usuário forneceu.`, 'string') }}"
+            },
+            {
+              "fieldId": "description",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `Descrição detalhada do incidente fornecido pelo usuário.`, 'string') }}"
+            },
+            {
+              "fieldId": "priority",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Prioridade do incidente.`, 'string') }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Aberto"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        4112,
+        1552
+      ],
+      "id": "877b5139-7a7c-4a93-b8f9-c113e90d450f",
+      "name": "RegistrarIncidente",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "users",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        4240,
+        1552
+      ],
+      "id": "b77d4327-9125-483f-b73c-e7a7e6214b0f",
+      "name": "BuscarUsers",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## TELA HTML\n",
+        "height": 256,
+        "width": 768
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3344,
+        896
+      ],
+      "id": "4e74a4a3-c3fb-4ee6-970a-65c5d6b708cd",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## Agente IA\n",
+        "height": 464,
+        "width": 1520,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3344,
+        1232
+      ],
+      "id": "3a204137-0576-4559-9ed5-4ce44fbecfc3",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "path": "353ebb44-c0e6-483e-a26d-3fc3c14901c0",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        3456,
+        992
+      ],
+      "id": "29e58f7c-427f-47b9-88fe-1694a190c825",
+      "name": "Webhook3",
+      "webhookId": "353ebb44-c0e6-483e-a26d-3fc3c14901c0",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "options": {
+          "systemMessage": "=# 1. IDENTIDADE E TOM DE VOZ\nVocê é o **NexusBot**, um analista de TI sênior e prestativo do **CMDB Nexus**.\nSua personalidade é profissional, mas empática e humana. Você não soa como um robô preenchendo um formulário, mas como um colega eficiente ajudando a resolver problemas.\n\n**Diretrizes de Conversação:**\n- Evite repetições mecânicas (\"Entendido\", \"Certo\" o tempo todo). Varie seu vocabulário.\n- Em **Incidentes Críticos**, demonstre senso de urgência e tranquilize o usuário.\n- Seja proativo: Se o usuário já fornecer todas as informações na primeira mensagem, não pergunte novamente; apenas confirme e registre.\n- **Data e Hora atual:** {{ $now.format('dd/MM/yyyy HH:mm') }} (Utilize para contexto, se necessário).\n\n---\n\n# 2. OBJETIVOS E FLUXOS\nSeu trabalho é gerenciar dois fluxos principais no CMDB. Detecte a intenção do usuário automaticamente.\n\n## FLUXO A: Registrar Incidente (Problemas, Bugs, Lentidão)\nSe o usuário relatar algo quebrado, siga este processo:\n\n1.  **Coleta Inteligente:** Extraia `title` e `description` do relato do usuário. Se faltar algo, pergunte de forma natural.\n2.  **Análise de Prioridade (Obrigatório):** Antes de confirmar, analise mentalmente o impacto:\n    - *Baixa:* Afeta um usuário, trabalho não para.\n    - *Média:* Afeta grupo pequeno ou funcionalidade não vital.\n    - *Alta:* Setor parado ou funcionalidade vital inoperante.\n    - *Crítica:* Empresa parada, ERP fora, prejuízo financeiro imediato.\n    *Dica:* Explique brevemente ao usuário por que você escolheu essa prioridade.\n3.  **Confirmação e Ação:** Resuma os dados e a prioridade. Após o \"Sim\" do usuário, execute `RegistrarIncidente`.\n4.  **Resultado:** A ferramenta retornará o ID/Protocolo real. Informe este número ao usuário.\n\n## FLUXO B: Cadastro de IC (Novos Ativos)\nSe o usuário quiser adicionar um servidor, notebook ou ativo:\n\n1.  **Coleta de Dados:** Obtenha `name`, `item_type` e `environment`.\n2.  **Validação de Proprietário (Crucial):**\n    - Pergunte quem será o responsável (`item_owner`).\n    - Assim que o usuário responder o nome ou e-mail, execute IMEDIATAMENTE a ferramenta `BuscaUsers`.\n    - Se a ferramenta retornar sucesso/nome completo, confirme: \"Encontrei o [Nome Retornado], correto?\".\n    - Se não encontrar, peça para verificar a grafia.\n3.  **Confirmação e Ação:** Com o usuário validado e dados prontos, execute `CriarIC`.\n\n---\n\n# 3. FERRAMENTAS (TOOLS)\n\nUtilize as ferramentas abaixo estritamente conforme as regras:\n\n- **`BuscaUsers`**:\n  - *Quando usar:* Sempre que precisar validar o campo `item_owner` no cadastro de IC.\n  - *Oculto:* Não mostre IDs internos ou JSON bruto para o usuário. Apenas confirme o nome legível.\n\n- **`CriarIC`**:\n  - *Argumentos:* `name`, `item_type`, `environment`, `item_owner` (validado).\n\n- **`RegistrarIncidente`**:\n  - *Argumentos:* `title`, `description`, `priority`.\n  - *Retorno:* Esta ferramenta retornará o número do protocolo. Use este número na resposta final.\n\n---\n\n# 4. EXEMPLOS DE INTERAÇÃO (Few-Shot Learning)\n\n**Exemplo 1 (Fluxo Fluido - Incidente):**\n*Usuário:* \"O servidor de e-mail caiu e ninguém na empresa consegue enviar nada!\"\n*NexusBot:* \"Nossa, isso é sério. Vou priorizar esse atendimento. Pelo seu relato, isso classifica-se como **Prioridade Crítica** (afeta toda a empresa).\nPosso registrar o incidente 'Falha geral no servidor de e-mail' com essa prioridade?\"\n*Usuário:* \"Sim, por favor.\"\n*NexusBot:* (Executa tool) \"Pronto. Incidente registrado sob o protocolo **#9921**. A equipe de infraestrutura já foi notificada.\"\n\n**Exemplo 2 (Fluxo Guiado - IC):**\n*NexusBot:* \"Olá! Sou o NexusBot. Precisa registrar um ativo ou reportar um problema hoje?\"\n*Usuário:* \"Novo ativo.\"\n*NexusBot:* \"Beleza, vamos cadastrar. Qual o nome e o tipo do equipamento?\"\n*Usuário:* \"É um notebook para o João Silva, nome NTB-RH-99.\"\n*NexusBot:* (Executa BuscaUsers para 'João Silva') \"Encontrei 'João Paulo da Silva' no RH. É esse mesmo?\"\n*Usuário:* \"Sim.\"\n*NexusBot:* \"Perfeito. Cadastrando NTB-RH-99 para João Paulo em Produção...\"\n\n---\n\n# 5. RESTRIÇÕES FINAIS\n- Se a ferramenta der erro, diga: \"Tive um problema técnico ao salvar no Nexus. O erro foi: [mensagem de erro da tool]. Podemos tentar de novo?\"\n- Mantenha respostas concisas.\n",
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        3920,
+        1328
+      ],
+      "id": "3d6595ac-06b3-4405-9c5b-3ae7743f5110",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3728,
+        1552
+      ],
+      "id": "5cde31e7-2c94-4971-b86f-f1d8f52b9da2",
+      "name": "Google Gemini Chat Model10",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "AZYv4rEBo0tTotiJ",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/AZYv4rEBo0tTotiJ",
+          "cachedResultName": "[NEXUS] Registra Servidor"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {}
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        3808,
+        496
+      ],
+      "id": "de6cabbc-222d-453a-abf2-73b2b2c57a4d",
+      "name": "Call '[NEXUS] Registra Servidor'"
+    },
+    {
+      "parameters": {
+        "command": "=cd ~/ansible-project && ansible-playbook collect_system_info.yml -i inventory.ini"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        3584,
+        496
+      ],
+      "id": "256c1e61-4666-4d35-988a-7ee41795bea4",
+      "name": "Execute a command1",
+      "alwaysOutputData": false,
+      "credentials": {
+        "sshPassword": {
+          "id": "x3N1ua0BnyNkfuK3",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "8118d081-38c7-464f-b2f2-c7dbab44d385",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        3360,
+        496
+      ],
+      "id": "afbec1a0-9ea0-471e-8a58-b872eaadc06d",
+      "name": "Webhook4",
+      "webhookId": "8118d081-38c7-464f-b2f2-c7dbab44d385",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "701cfa66-ad99-4172-8497-ee589fed2793",
+              "name": "session",
+              "value": "={{ $json.body.session }}",
+              "type": "string"
+            },
+            {
+              "id": "fcda0ae1-753a-4ee6-8900-770eb560bbc8",
+              "name": "chatId",
+              "value": "={{ $json.body.payload.from }}",
+              "type": "string"
+            },
+            {
+              "id": "bfd8d79a-7c9e-46f7-bca1-e6e7e49a0ea2",
+              "name": "pushName",
+              "value": "={{ $json.body.payload._data.notifyName }}",
+              "type": "string"
+            },
+            {
+              "id": "4df9f42c-5345-4608-8b62-8f33ad8f3f73",
+              "name": "payload_id",
+              "value": "={{ $json.body.payload.id }}",
+              "type": "string"
+            },
+            {
+              "id": "0bf33797-98fc-42c2-b8bc-bc11b873ba9c",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "d6529b25-cc71-4067-87e1-06c595b917ce",
+              "name": "message",
+              "value": "={{ $json.body.payload.body }}",
+              "type": "string"
+            },
+            {
+              "id": "408445fd-a889-44f4-b585-5d0ec7f4f117",
+              "name": "fromMe",
+              "value": "={{ $json.body.payload.fromMe }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4544,
+        2256
+      ],
+      "id": "63e20bf9-6bb7-4410-9d66-d24b961ee596",
+      "name": "Dados"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Dados').item.json.session }}",
+        "chatId": "={{ $('Dados').item.json.chatId }}",
+        "text": "={{ $json.output }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-waha.WAHA",
+      "typeVersion": 202411,
+      "position": [
+        5520,
+        2256
+      ],
+      "id": "451738ff-56b5-46c3-8e95-44a09a83be83",
+      "name": "WAHA1",
+      "credentials": {
+        "wahaApi": {
+          "id": "HSoeDT2Ver7ckuut",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        4544,
+        2448
+      ],
+      "id": "8e522d68-ddb0-48d7-88fc-65a02adb24e4",
+      "name": "No Operation, do nothing8"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $('Webhook5').item.json.content.data.key.remoteJid.split(\"@\")[0] }}_block",
+        "value": "true",
+        "keyType": "string"
+      },
+      "id": "3c5c57f0-800a-4548-9106-6c7f534710be",
+      "name": "Bloqueia IA",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        4096,
+        2064
+      ],
+      "credentials": {
+        "redis": {
+          "id": "RXGh26UeK9QGvktP",
+          "name": "Redis account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "block",
+        "key": "={{ $json.celular }}_block",
+        "options": {}
+      },
+      "id": "21a2f727-d123-4a93-9d76-dc3457ad52ef",
+      "name": "Busca status de bloqueio da IA",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        4096,
+        2352
+      ],
+      "credentials": {
+        "redis": {
+          "id": "RXGh26UeK9QGvktP",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.block }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "IA PODE RESPONDER"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "3ef0e01c-cc14-4663-bb4d-2905b350c3ab",
+                    "leftValue": "={{ $json.block }}",
+                    "rightValue": "true",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "IA NAO PODE RESPONDER"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1ca0ae6d-c07a-4af5-96f8-33ac90cedba6",
+      "name": "Status Bloqueio",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        4320,
+        2352
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "d950719b-1750-4a89-8dc1-a26fcd816033",
+                    "leftValue": "={{ $json.content.data.key.fromMe }}",
+                    "rightValue": "true",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "from me"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "18954740-abf6-4ae2-a0e5-dda5ef550fc9",
+                    "leftValue": "={{ $json.fields.routingKey }}",
+                    "rightValue": "messages.upsert",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "message_upsert"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b423f0c5-1c3d-4ba4-973b-d9901d0c7c85",
+      "name": "Origem Mensagem",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        3872,
+        2160
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Falha ao criar chave! "
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        4320,
+        2160
+      ],
+      "id": "aaf88da0-f036-41e2-8b13-e5444a203e20",
+      "name": "Erro Redis"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3872,
+        2352
+      ],
+      "id": "c17ddbed-39cd-42b1-b0b8-114f931aeea0",
+      "name": "No Operation, do nothing2"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "incidents",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Field_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5248,
+        2608
+      ],
+      "id": "a8adc5f1-d75c-4109-89e0-8d6100ca5695",
+      "name": "ExcluirIncidente",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "teste",
+        "tableName": {
+          "__rl": true,
+          "value": "settings",
+          "mode": "list",
+          "cachedResultName": "settings"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        5408,
+        2528
+      ],
+      "id": "18109ddd-243f-4c17-a552-400b119e026a",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        5424,
+        2720
+      ],
+      "id": "15bde99d-6932-4ef8-a8d6-1266c456826c",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "18072cbd-0337-43cf-a3dd-a1376ffb746f",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        3424,
+        2256
+      ],
+      "id": "5b87d2b2-cada-405b-ae53-289f22667966",
+      "name": "Webhook5",
+      "webhookId": "18072cbd-0337-43cf-a3dd-a1376ffb746f",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message }}",
+        "options": {
+          "systemMessage": "=## 1. Persona e Objetivo\n\nVocê é um assistente de IA chamado **NexusBot**, especializado em **Gerenciamento de Configuração e Incidentes de TI**.  \nSeu objetivo é ajudar o usuário a **registrar novos Itens de Configuração (ICs)** e **abrir incidentes** no sistema **CMDB Nexus**, garantindo que todas as informações necessárias sejam coletadas com clareza, precisão e priorização adequada.\n\n## 2. Processos e Coleta de Dados\n\nVocê deve ser capaz de executar **dois tipos de fluxos** distintos:  \n1. **Cadastro de ICs (Itens de Configuração)**  \n2. **Registro de Incidentes**\n\n### 2.1. Cadastro de ICs\n\nColetar os seguintes campos obrigatórios:\n1. **`name`** — Nome ou identificador único do item (ex: “SRV-DB-PROD-02”, “Notebook-RH-015”).  \n2. **`item_type`** — Tipo do item (ex: “servidor”, “notebook”, “desktop”, “impressora”).  \n3. **`environment`** — Ambiente do item (ex: “Produção”, “Homologação”, “Desenvolvimento”).\n\n### 2.2. Registro de Incidentes\n\nColetar e registrar incidentes com os seguintes campos:\n1. **`title`** — Título resumido do incidente.  \n   *Exemplo:* “Erro ao acessar o sistema ERP.”  \n2. **`description`** — Descrição detalhada do incidente, explicando o que aconteceu e qual impacto.  \n   *Exemplo:* “Usuários do setor financeiro não conseguem acessar o ERP desde as 9h. A tela fica travada na autenticação.”  \n3. **`priority`** — Deve ser **analisada e atribuída automaticamente pelo agente** com base na gravidade e impacto descritos:\n   - **Baixa:** Incidentes isolados, sem impacto operacional.  \n   - **Média:** Afeta poucos usuários ou processos secundários.  \n   - **Alta:** Interrompe atividades principais de um setor.  \n   - **Crítica:** Afeta toda a operação ou sistemas essenciais.\n\n## 3. Ferramentas (Tools)\n\nVocê tem acesso a duas ferramentas:\n\n- **`CriarIC`** — Registra um novo Item de Configuração.  \n  *Argumentos:* `name`, `item_type`, `environment`\n\n- **`RegistrarIncidente`** — Registra um novo incidente no CMDB Nexus.  \n  *Argumentos:* `title`, `description`, `priority`\n\n## 4. Regras de Interação\n\n### Passo 1: Início Proativo\nComece sempre a conversa apresentando-se e perguntando se o usuário deseja **registrar um novo IC** ou **abrir um incidente**.  \n**Exemplo:**  \n“Olá! Sou o NexusBot, assistente do CMDB Nexus. Você deseja registrar um novo Item de Configuração ou abrir um incidente?”\n\n### Passo 2: Coleta de Dados\n- Se o usuário escolher **registrar IC**, siga o fluxo do item **2.1**.  \n- Se escolher **abrir incidente**, siga o fluxo do item **2.2**.\n\nMantenha o diálogo guiado e claro, fazendo **uma pergunta por vez** e **oferecendo exemplos úteis**.\n\n### Passo 3: Confirmação Final\nAntes de registrar, sempre apresente um **resumo dos dados coletados** e peça confirmação.  \n**Exemplo:**  \n“Certo, vamos registrar o incidente com os seguintes dados:  \n- **Título:** [title]  \n- **Descrição:** [description]  \n- **Prioridade sugerida:** [priority]  \nEstá tudo correto?”\n\n### Passo 4: Registro\n- Se confirmado: chame a ferramenta correspondente (`CriarIC` ou `RegistrarIncidente`).  \n- Se houver erro: pergunte qual campo precisa ser corrigido e repita a confirmação.\n\n### Passo 5: Encerramento\nApós a execução da ferramenta, informe que o registro foi concluído e gere um **protocolo de 5 dígitos numérico aleatório**.  \n**Exemplo:**  \n“Incidente registrado com sucesso no CMDB Nexus. Protocolo: 84215. Posso te ajudar com mais alguma coisa?”\n\n## 5. Regras e Restrições\n\n- Utilize linguagem **profissional, objetiva e cordial**.  \n- Sempre **auxilie o usuário** quando ele parecer confuso ou não souber o que responder.  \n- Jamais invente dados — se o usuário não fornecer, pergunte novamente de forma educada.  \n- Mantenha **máximo de 2 parágrafos curtos por mensagem** (até 250 caracteres cada).  \n- **Atenda somente em português brasileiro e via chat. Utilize a data/hora atual:**  \n  {{ $now.weekdayLong }}, {{ $now.format('dd/MM/yyyy') }}, {{ $now.hour.toString().padStart(2, '0') }}:{{ $now.minute.toString().padStart(2, '0') }}.\n\n## 6. Exemplo de Conversa\n\n**NexusBot:** Olá! Sou o assistente NexusBot, e posso te ajudar a registrar um novo Item de Configuração ou abrir um incidente. O que você deseja fazer?  \n**Usuário:** Quero abrir um incidente.  \n**NexusBot:** Certo! Qual o título do incidente?  \n**Usuário:** Falha no servidor de banco de dados.  \n**NexusBot:** Entendido. Pode me detalhar o que aconteceu?  \n**Usuário:** O servidor SRV-DB-PROD-02 parou de responder, e o sistema ERP está fora do ar desde as 8h.  \n**NexusBot:** Obrigado! Analisando a gravidade, este incidente será classificado como **Prioridade Crítica**.  \n**NexusBot:** Vamos registrar com os seguintes dados:  \n- **Título:** Falha no servidor de banco de dados  \n- **Descrição:** O servidor SRV-DB-PROD-02 parou de responder, afetando o ERP desde as 8h.  \n- **Prioridade:** Crítica  \nEstá tudo correto?  \n**Usuário:** Sim.  \n**NexusBot:** Perfeito, registrando o incidente no CMDB Nexus...  \nIncidente registrado com sucesso! Protocolo: 29104.  \n\n---"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        4848,
+        2256
+      ],
+      "id": "25eaee48-63ba-4653-b9cb-13035571ead6",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.chatId }}",
+        "sessionTTL": 3600,
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        4720,
+        2736
+      ],
+      "id": "f9ee312d-72c5-4cdf-b39d-52261c410a7d",
+      "name": "Redis Chat Memory1",
+      "credentials": {
+        "redis": {
+          "id": "RXGh26UeK9QGvktP",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5280,
+        2256
+      ],
+      "id": "5b02e83e-061f-4f1d-898e-631958e054c0",
+      "name": "Wait1",
+      "webhookId": "fb03899f-9066-435e-beff-1553df7de9fb"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        4544,
+        2752
+      ],
+      "id": "1925327e-1f8d-4add-a3d2-488498e32ab1",
+      "name": "Google Gemini Chat Model11",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ic4ByAQp4Yxjenlx",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "configuration_items",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Nome do Item que o usuário informou.`, 'string') }}"
+            },
+            {
+              "fieldId": "item_type",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `Tipo do item que o usuário informou.`, 'string') }}"
+            },
+            {
+              "fieldId": "environment",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Tipo do ambiente que o usuário informou.`, 'string') }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Ativo"
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        4944,
+        2608
+      ],
+      "id": "8140c888-c26e-493b-acf0-0728f0d00ce4",
+      "name": "CriarIC1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "incidents",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues0_Field_Value', `Titulo do incidente que o usuário forneceu.`, 'string') }}"
+            },
+            {
+              "fieldId": "description",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', `Descrição detalhada do incidente fornecido pelo usuário.`, 'string') }}"
+            },
+            {
+              "fieldId": "priority",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', `Prioridade do incidente.`, 'string') }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Aberto"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5104,
+        2608
+      ],
+      "id": "b1a1dd14-96a0-4278-9b20-483cc761b239",
+      "name": "RegistrarIncidente1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Vx1XOd8eYXcHE8Za",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        4320,
+        1968
+      ],
+      "id": "121e683c-7cfd-47a9-915a-e108e58634dc",
+      "name": "No Operation, do nothing3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "abca1085-0e35-4a77-ae3b-797164fb29ed",
+              "leftValue": "={{ $json.content.data.chatwootMessageId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3648,
+        2256
+      ],
+      "id": "d994f922-50fb-4d37-968a-aef772ad719d",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "content": "## Fluxo para verificar status do servidor e licença do windows",
+        "height": 960,
+        "width": 3264,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -176
+      ],
+      "id": "e954ac93-9c00-4848-aab7-c51e277cd874",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "## Fluxo para coleta de dados do sistema e análise com Agentes LLM",
+        "height": 2272,
+        "width": 3264,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        816
+      ],
+      "id": "b7339a4d-5700-48a6-8048-3f7fb5f743e0",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "## Fluxo para registro de máquina (desktop/notebook)",
+        "height": 464,
+        "width": 3264,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3264,
+        -176
+      ],
+      "id": "b478859b-3255-4ee3-b922-c3355efb1fce",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "## Fluxo para registro de servidor",
+        "height": 464,
+        "width": 3264,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3264,
+        320
+      ],
+      "id": "fcec070b-c0db-4c1d-a191-c64f0acbacc9",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "## Fluxo Agente IA via HTML",
+        "height": 928,
+        "width": 3264,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3264,
+        816
+      ],
+      "id": "e27c6302-71cd-49dc-9d02-133a77104076",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "## Fluxo Agente IA chatbot",
+        "height": 1312,
+        "width": 3264,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3264,
+        1776
+      ],
+      "id": "23721886-493b-4e01-b2d4-dbe0211fcd10",
+      "name": "Sticky Note17"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute a command": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "send_message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "send_message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "send_message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send_message": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send_message1": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Execute a command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Pegar IC",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pegar Log",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pegar Incidentes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get many rows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pegar IC": {
+      "main": [
+        [
+          {
+            "node": "Quantidade de IC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quantidade de IC": {
+      "main": [
+        [
+          {
+            "node": "AI Processa IC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pegar Incidentes": {
+      "main": [
+        [
+          {
+            "node": "Quantidade de Incidente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pegar Log": {
+      "main": [
+        [
+          {
+            "node": "Quantidade de Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quantidade de Incidente": {
+      "main": [
+        [
+          {
+            "node": "AI Processa Incidentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quantidade de Log": {
+      "main": [
+        [
+          {
+            "node": "AI Processa Logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Processa Logs",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output Relatorio": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items3": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Output Relatorio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Split Out3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analisador Incidente",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out4": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items4": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Analisador Incidente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Filtro1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Filtro2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Filtro3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model7": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Filtro4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Agente Filtro4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analisador Incidente": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Processa Logs": {
+      "main": [
+        [
+          {
+            "node": "Agente Filtro3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Processa Incidentes": {
+      "main": [
+        [
+          {
+            "node": "Agente Filtro2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Processa IC": {
+      "main": [
+        [
+          {
+            "node": "Agente Filtro1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Filtro4": {
+      "main": [
+        [
+          {
+            "node": "Registro Texto Incidente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Filtro3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Agente Filtro2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Agente Filtro1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model8": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Processa IC",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model9": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Processa Incidentes",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows1": {
+      "main": [
+        [
+          {
+            "node": "Split Out4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Registro Texto Relatorio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Coletar Dados": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Coletar Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados Coletados": {
+      "main": [
+        [
+          {
+            "node": "Registrar Servidor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Dados Coletados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CriarIC": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RegistrarIncidente": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BuscarUsers": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook3": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model10": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a command1": {
+      "main": [
+        [
+          {
+            "node": "Call '[NEXUS] Registra Servidor'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook4": {
+      "main": [
+        [
+          {
+            "node": "Execute a command1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados": {
+      "main": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bloqueia IA": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Erro Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca status de bloqueio da IA": {
+      "main": [
+        [
+          {
+            "node": "Status Bloqueio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status Bloqueio": {
+      "main": [
+        [
+          {
+            "node": "Dados",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Origem Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Bloqueia IA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Busca status de bloqueio da IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ExcluirIncidente": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook5": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "WAHA1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model11": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CriarIC1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RegistrarIncidente1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Origem Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "aac2d5ca-d804-4eb5-9b14-30f57fa994d4",
+  "meta": {
+    "instanceId": "800842ee217a46077684b880cd57dd62a3d4e0efa4e2bb09c35a8b11ba0d1534"
+  },
+  "id": "hGThYviB5u2cUbEo",
+  "tags": [
+    {
+      "updatedAt": "2025-12-04T21:33:50.106Z",
+      "createdAt": "2025-12-04T21:33:50.106Z",
+      "id": "Wc7T5murLEZYGzmy",
+      "name": "[PROD]"
+    },
+    {
+      "updatedAt": "2025-12-04T21:33:57.921Z",
+      "createdAt": "2025-12-04T21:33:57.921Z",
+      "id": "rgFFWMXQY6wS265h",
+      "name": "[ATIVO]"
+    }
+  ]
+}
